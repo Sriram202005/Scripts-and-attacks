@@ -1,0 +1,172 @@
+# 🟢 FRIDA SERVER SETUP (STEP-BY-STEP)
+
+## ⚙️ 1. Push frida-server to emulator
+
+On Windows (PowerShell / CMD):
+
+```bash id="s1"
+adb push frida-server /data/local/tmp/
+```
+
+---
+
+## ⚙️ 2. Fix permissions
+
+```bash id="s2"
+adb shell chmod 755 /data/local/tmp/frida-server
+```
+
+---
+
+## ⚙️ 3. Enter emulator shell
+
+```bash id="s3"
+adb shell
+```
+
+---
+
+## ⚙️ 4. Switch to root (if available)
+
+```bash id="s4"
+su
+```
+
+If root works, prompt changes to `#`
+
+---
+
+## ⚙️ 5. Navigate to folder
+
+```bash id="s5"
+cd /data/local/tmp
+```
+
+---
+
+## ⚙️ 6. Start frida-server (foreground test)
+
+```bash id="s6"
+./frida-server
+```
+
+---
+
+## ⚙️ 7. Start frida-server (background mode - recommended)
+
+```bash id="s7"
+./frida-server &
+```
+
+---
+
+## ⚙️ 8. Verify it is running
+
+```bash id="s8"
+ps | grep frida
+```
+
+Expected:
+
+```text id="s9"
+frida-server
+```
+
+---
+
+## ⚙️ 9. Verify port is active (optional check)
+
+```bash id="s10"
+netstat -an | grep 27042
+```
+
+---
+
+# 🚀 ONE-LINE FULL COMMAND FLOW (quick version)
+
+```bash id="s11"
+adb push frida-server /data/local/tmp/ &&
+adb shell chmod 755 /data/local/tmp/frida-server &&
+adb shell su -c "/data/local/tmp/frida-server &"
+```
+
+---
+
+# 🧠 IMPORTANT NOTES
+
+### ✔ correct binary must match emulator:
+
+* x86 → x86 frida-server
+* x86_64 → x86_64 frida-server
+* arm64 → arm64 frida-server
+
+---
+
+### ⚠️ If you see errors like:
+
+* “permission denied”
+* “not executable”
+* “address already in use”
+
+Then:
+
+```bash id="s12"
+pkill frida-server
+```
+
+or reboot emulator.
+
+---
+
+# 💡 FINAL FLOW (mental model)
+
+```text id="s13"
+PC (frida CLI)
+   ⇅
+ADB bridge
+   ⇅
+frida-server (emulator)
+   ⇅
+target app process
+```
+
+---
+
+If you want next step, I can show you:
+✔ auto-start frida-server script
+✔ or how to make it survive reboot
+✔ or full Frida + APK testing pipeline (clean workflow)
+
+
+
+calude
+
+step 1
+
+adb shell
+
+Then inside the shell:
+
+su
+cd /data/local/tmp
+./frida-server -l 0.0.0.0:27043 &
+exit
+exit
+
+step 2
+
+Verify it's running
+
+adb shell ps -e | findstr frida
+
+Then port forward and connect
+
+adb forward tcp:27043 tcp:27043
+
+step 3
+
+frida -H 127.0.0.1:27043 -f com.iiab.mobilebanking -l "C:\Users\srira\OneDrive\Desktop\bypass.js
+
+to find pid of an 
+
+adb shell ps-A | findstr iiab

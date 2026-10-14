@@ -1,0 +1,5 @@
+SNMP → Info leak → Lateral RCE
+bash# SNMP itself rarely gives RCE directly, but leaks creds/process info → chain to SSH/SMB
+snmpwalk -c public -v2c target 1.3.6.1.4.1.77.1.2.25   # may reveal Windows usernames
+# Use found creds with crackmapexec/impacket for RCE as above
+

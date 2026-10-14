@@ -1,0 +1,4 @@
+PORT 593 — RPC over HTTP
+bashnmap -sV -p 593 target
+# Same as 135, RPC over HTTP proxy
+impacket-rpcdump -port 593 DC_IP

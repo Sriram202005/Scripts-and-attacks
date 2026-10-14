@@ -1,0 +1,155 @@
+Web Application Penetration Testing Checklist
+🔐 1. Authentication
+☐ Weak password policy
+☐ Username enumeration
+☐ Default credentials
+☐ Brute-force protection
+☐ Account lockout
+☐ CAPTCHA bypass
+☐ Password reset flaws
+☐ OTP bypass
+☐ OTP reuse
+☐ OTP brute force
+☐ MFA bypass
+☐ Session fixation
+☐ Session timeout
+☐ Logout invalidation
+☐ Remember Me functionality
+☐ JWT manipulation (alg:none, weak secret, expiration, signature validation)
+👤 2. Authorization
+☐ Horizontal Privilege Escalation (IDOR/BOLA)
+☐ Vertical Privilege Escalation
+☐ Forced browsing
+☐ Direct URL access
+☐ Parameter manipulation
+☐ Role-based access control bypass
+☐ API authorization checks
+☐ Hidden admin functionality
+💉 3. SQL Injection
+☐ Error-Based
+☐ Boolean-Based Blind
+☐ Time-Based Blind
+☐ UNION-Based
+☐ Second-Order SQLi
+☐ SQLi in GET parameters
+☐ SQLi in POST parameters
+☐ SQLi in JSON
+☐ SQLi in Cookies
+☐ SQLi in Headers
+⚡ 4. Cross-Site Scripting (XSS)
+☐ Reflected XSS
+☐ Stored XSS
+☐ DOM XSS
+☐ SVG XSS
+☐ XSS in filename
+☐ XSS in PDF/Export features
+☐ XSS in rich text editors
+📂 5. File Upload
+☐ Extension validation
+☐ Double extension
+☐ MIME type bypass
+☐ Content-Type bypass
+☐ Magic byte validation
+☐ Null byte (legacy)
+☐ SVG upload
+☐ File overwrite
+☐ Filename injection
+☐ Path traversal in filename
+☐ Executable file upload (PHP/JSP/ASPX where applicable)
+☐ Public access to uploaded files
+💻 6. Command Injection
+☐ Linux command injection
+☐ Windows command injection
+☐ Blind command injection
+☐ Time-based command injection
+📁 7. Path Traversal / LFI
+☐ Directory traversal (../)
+☐ URL encoding bypass
+☐ Double URL encoding
+☐ Windows traversal (..\)
+☐ Local File Inclusion (LFI)
+☐ Log file inclusion
+🌍 8. SSRF
+☐ localhost access
+☐ Internal IP access
+☐ Cloud metadata endpoints
+☐ Alternate IP formats
+☐ Redirect bypass
+📄 9. XXE
+☐ XML entity injection
+☐ Local file read
+☐ Blind XXE
+☐ SSRF through XXE
+🔧 10. SSTI
+☐ Jinja2
+☐ Twig
+☐ Freemarker
+☐ Velocity
+☐ Smarty
+🗂️ 11. NoSQL Injection
+☐ Authentication bypass
+☐ Operator injection ($ne, $gt, etc.)
+☐ Blind NoSQL injection
+📖 12. LDAP Injection
+☐ Login filter manipulation
+☐ Search filter manipulation
+🔄 13. CSRF
+☐ Missing CSRF token
+☐ Weak CSRF token
+☐ Token reuse
+☐ State-changing requests
+↪️ 14. Open Redirect
+☐ next=
+☐ return=
+☐ redirect=
+☐ url=
+🖼️ 15. Clickjacking
+☐ Missing X-Frame-Options
+☐ Missing frame-ancestors in CSP
+⚙️ 16. Session Management
+☐ Secure cookie
+☐ HttpOnly cookie
+☐ SameSite cookie
+☐ Session fixation
+☐ Session prediction
+☐ Session expiration
+☐ Multiple concurrent sessions
+☐ Logout invalidation
+🧠 17. Business Logic
+☐ Price manipulation
+☐ Quantity manipulation
+☐ Coupon abuse
+☐ Multiple coupon redemption
+☐ Negative value testing
+☐ Payment bypass
+☐ Workflow bypass
+☐ Race condition
+☐ Referral abuse
+☐ Wallet abuse
+☐ Inventory manipulation
+🔒 18. Security Misconfiguration
+☐ Directory listing
+☐ Debug mode
+☐ Verbose error messages
+☐ Backup files
+☐ .git exposure
+☐ .env exposure
+☐ Default credentials
+☐ Version disclosure
+🔌 19. API Security
+☐ Authentication
+☐ Authorization (BOLA)
+☐ Mass Assignment
+☐ Rate limiting
+☐ Excessive Data Exposure
+☐ HTTP method tampering
+☐ JWT validation
+📢 20. Information Disclosure
+☐ Stack traces
+☐ API keys
+☐ Access tokens
+☐ Secrets in JavaScript
+☐ Source maps
+☐ Email enumeration
+☐ Username enumeration
+☐ Sensitive response headers

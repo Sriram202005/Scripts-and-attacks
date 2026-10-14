@@ -1,0 +1,18 @@
+1. ENUMERATE        assetfinder / subfinder
+        ↓
+2. CHECK CNAMEs     dig / nslookup
+        ↓
+3. FIND DANGLING    does CNAME point to unclaimed service?
+        ↓
+4. FINGERPRINT      what platform? (GitHub, Vercel, Heroku...)
+        ↓
+5. CLAIM IT         create account on that platform, claim the name
+        ↓
+6. SERVE CONTENT    host your page on the claimed subdomain
+
+
+dig / nslookupCheck DNS/CNAME records
+
+nucleiAuto-detect takeover fingerprintsnuclei -t takeovers/ -l subs.txt
+subjackAutomated takeover checkersubjack -w subs.txt -ssl
+subzyAutomated takeover checkersubzy run --targets subs.txt

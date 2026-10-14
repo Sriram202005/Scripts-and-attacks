@@ -1,0 +1,19 @@
+testflight preproduction app that access to our site
+
+or else they will provide .ipa file 
+
+siteloader application install in our system use that to install the .ipa
+
+then Frida
+
+then codeshare use scripts then try objection instead of root detection, ssl pinning 
+
+ios jailbreak disable, ios sslpin disable these are objection method
+
+or do reverse engineering use ghidra 
+
+unzip file inside payload inside the application name folder.app inside application name binary file
+
+static analysis info.plist
+
+disassemble using ghidra 

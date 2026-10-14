@@ -1,0 +1,10 @@
+MySQL / PostgreSQL
+bash# MySQL
+nmap --script mysql-info,mysql-enum,mysql-empty-password,mysql-brute -p 3306 target
+mysql -h target -u root -p
+mysql -h target -u root --password=''   # blank password
+
+# PostgreSQL
+nmap --script pgsql-brute -p 5432 target
+psql -h target -U postgres
+# Default: postgres:postgres | postgres:(blank)

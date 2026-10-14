@@ -1,0 +1,12 @@
+QUICK WINS (always check these first)
+bashid
+sudo -l
+find / -perm -4000 2>/dev/null
+cat /etc/crontab
+env
+history
+cat ~/.bash_history
+find / -writable -type f 2>/dev/null | grep -v proc
+find / -name "*.conf" 2>/dev/null | xargs grep -l "password"
+ss -tlnp   # open ports internal
+cat /etc/hosts

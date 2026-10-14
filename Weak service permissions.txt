@@ -1,0 +1,31 @@
+Windows PE
+
+WinPEAS
+winPEAS.exe
+
+Unquoted service paths
+
+wmic service get name,displayname,pathname,startmode
+
+AlwaysInstallElevated
+
+reg query HKCU\Software\Policies\Microsoft\Windows\Installer
+reg query HKLM\Software\Policies\Microsoft\Windows\Installer
+
+SeImpersonatePrivilege
+
+whoami /priv
+
+Weak service permissions
+
+accesschk.exe
+sc qc <service>
+sc query <service>
+
+Stored credentials
+
+cmdkey /list
+
+Registry secrets
+
+reg query HKLM /f password /t REG_SZ /s

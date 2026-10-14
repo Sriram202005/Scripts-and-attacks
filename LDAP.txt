@@ -1,0 +1,32 @@
+LDAP
+Nmap Scripts
+bashnmap --script ldap-rootdse,ldap-search,ldap-novell-getpass -p 389,636 target
+nmap -p 389 --script ldap-search --script-args 'ldap.username="cn=admin,dc=domain,dc=com",ldap.password=pass,ldap.qfilter=users' target
+Tools
+bash# Anonymous LDAP enum
+ldapsearch -x -H ldap://target -b "dc=domain,dc=com"
+ldapsearch -x -H ldap://target -b "" -s base namingcontexts  # get base DN
+
+# Authenticated
+ldapsearch -x -H ldap://target -D "cn=admin,dc=domain,dc=com" -w pass -b "dc=domain,dc=com"
+
+# Dump everything
+ldapsearch -x -H ldap://target -D "user@domain.com" -w pass -b "dc=domain,dc=com" > ldap_dump.txt
+
+# Specific queries
+ldapsearch -x -H ldap://target -b "dc=domain,dc=com" "(objectClass=user)" sAMAccountName  # all users
+ldapsearch -x -H ldap://target -b "dc=domain,dc=com" "(objectClass=group)"               # groups
+ldapsearch -x -H ldap://target -b "dc=domain,dc=com" "(objectClass=computer)"            # computers
+ldapsearch -x -H ldap://target -b "dc=domain,dc=com" "(&(objectClass=user)(adminCount=1))" # admins
+
+# ldapdomaindump (outputs HTML/JSON)
+ldapdomaindump ldap://target -u 'domain\user' -p pass
+
+# Bloodhound collection (AD enumeration)
+bloodhound-python -u user -p pass -d domain.com -c All -ns target_dc_ip
+# Then load JSON into Bloodhound GUI
+
+# windapsearch
+python3 windapsearch.py --dc-ip target -u user@domain.com -p pass --da  # domain admins
+python3 windapsearch.py --dc-ip target -u user@domain.com -p pass -U    # all users
+python3 windapsearch.py --dc-ip target -u user@domain.com -p pass --computers

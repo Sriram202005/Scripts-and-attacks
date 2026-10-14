@@ -1,0 +1,5 @@
+NFS
+bashnmap --script nfs-ls,nfs-showmount,nfs-statfs -p 111,2049 target
+showmount -e target
+mount -t nfs target:/share /mnt/nfs
+# Check for root squashing disabled (mount as root → full access)

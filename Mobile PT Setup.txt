@@ -1,0 +1,218 @@
+Mobile PT Setup
+
+# 🧠 FULL WORKFLOW (STEP-BY-STEP)
+
+## 🟢 1. Start emulator + verify device
+
+```bash id="s1"
+adb devices
+```
+
+Expected:
+
+```text id="s2"
+emulator-5554   device
+```
+
+---
+
+## 🟢 2. Install APK into emulator
+
+```bash id="s3"
+adb install IIAB-sitRelease-100000-protected.apk
+```
+
+✔ Output:
+
+```text id="s4"
+Success
+```
+
+---
+
+## 🟢 3. Verify package installed
+
+```bash id="s5"
+adb shell pm list packages | findstr iiab
+```
+
+Result:
+
+```text id="s6"
+package:com.iiab.mobilebanking
+```
+
+---
+
+## 🟢 4. Start frida-server on emulator
+
+### Enter shell:
+
+```bash id="s7"
+adb shell
+su
+```
+
+### Start server:
+
+```bash id="s8"
+cd /data/local/tmp
+./frida-server &
+```
+
+✔ You confirmed:
+
+* process running
+* port 27042 active
+
+---
+
+## 🟢 5. Verify Frida sees emulator
+
+```bash id="s9"
+frida-ls-devices
+```
+
+Result:
+
+```text id="s10"
+emulator-5554  usb  Android Emulator
+```
+
+---
+
+## 🟢 6. Check running processes
+
+```bash id="s11"
+frida-ps -U
+```
+
+✔ Shows system apps + any running app processes
+
+---
+
+## 🟢 7. Launch app manually (initial testing)
+
+```bash id="s12"
+adb shell monkey -p com.iiab.mobilebanking 1
+```
+
+⚠️ In your case:
+
+* app launches briefly
+* then exits immediately
+
+---
+
+## 🟢 8. Try Frida ATTACH (failed initially)
+
+```bash id="s13"
+frida -U -n com.iiab.mobilebanking
+```
+
+❌ Failed because:
+
+* process did not exist
+
+---
+
+## 🟢 9. Identify correct process (confusion stage)
+
+You saw unrelated process:
+
+```
+abb
+```
+
+👉 That was NOT your target app.
+
+---
+
+## 🟢 10. FIX: Use SPAWN mode (correct method)
+
+```bash id="s14"
+frida -U -f com.iiab.mobilebanking -l script.js
+```
+
+✔ This worked:
+
+```
+Spawned com.iiab.mobilebanking
+```
+
+---
+
+## 🟢 11. Script injection happened
+
+Your script executed:
+
+* SSL pinning bypass logic
+* Java hooks started
+* cert file missing caused error
+
+---
+
+## 🟢 12. App crashed during runtime
+
+Error observed:
+
+* FileNotFoundException (missing cert)
+* ArrayIndexOutOfBoundsException (app internal crash)
+
+---
+
+# 🧠 FINAL FLOW SUMMARY
+
+```text id="s15"
+APK Install
+   ↓
+App installed in emulator
+   ↓
+frida-server started on device
+   ↓
+Frida connected from Windows
+   ↓
+monkey launch (manual test)
+   ↓
+process not stable
+   ↓
+Frida attach failed
+   ↓
+Frida spawn used (-f)
+   ↓
+script injected successfully
+   ↓
+app crashed due to script + internal checks
+```
+
+---
+
+# 🔥 KEY TAKEAWAY
+
+You successfully achieved:
+
+✔ APK installation
+✔ Emulator setup
+✔ Frida-server deployment
+✔ Frida connection
+✔ Spawn injection working
+
+---
+
+# ⚠️ ONLY PROBLEM NOW
+
+Not Frida.
+
+It is:
+
+> ❌ unstable script + app anti-analysis behavior
+
+---
+
+If you want next step, I can guide you to:
+
+✔ clean working Frida script (no crash SSL bypass)
+✔ proper early emulator/root bypass hooks
+✔ or stabilize app so Frida doesn’t crash it
+
+Just say 👍

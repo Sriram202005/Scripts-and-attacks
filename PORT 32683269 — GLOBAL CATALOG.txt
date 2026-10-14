@@ -1,0 +1,5 @@
+PORT 3268/3269 — GLOBAL CATALOG
+bash# Same as LDAP but searches entire forest
+ldapsearch -x -H ldap://DC_IP:3268 -b "" -s base
+ldapsearch -x -H ldap://DC_IP:3268 -D "user@domain.com" -w pass -b "dc=domain,dc=com" "(objectClass=user)"
+# Use 3269 for LDAPS global catalog

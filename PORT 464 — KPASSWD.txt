@@ -1,0 +1,4 @@
+PORT 464 — KPASSWD
+bash# Password change attacks
+impacket-kpasswd domain.com/user:oldpass@DC_IP -newpass NewPass123!
+# Useful after AS-REP roast cracked hash — change expired passwords

@@ -1,0 +1,15 @@
+PORT 53 — DNS
+bashnmap --script dns-zone-transfer,dns-srv-enum,dns-brute -p 53 target
+
+# Zone transfer (huge info leak)
+dig axfr domain.com @DC_IP
+host -l domain.com DC_IP
+dnsrecon -d domain.com -t axfr
+
+# Enum SRV records
+nmap --script dns-srv-enum --script-args dns-srv-enum.domain=domain.com target
+dnsrecon -d domain.com -t srv
+
+# Brute subdomains
+dnsrecon -d domain.com -t brt -D /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt
+gobuster dns -d domain.com -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5

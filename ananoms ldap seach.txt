@@ -1,0 +1,28 @@
+ananoms ldap seach
+
+sensitive creden disclosed via userpasswd attr
+
+weak passwd leads to breach the passwd or Weak Password Policy Leading to Credential Compromise
+
+acc takeover using breached cred
+
+RCE via abusing Jenkins feat
+
+Exposed keys in ubuntu user direc. or Exposure of Sensitive Keys in User Directory
+
+overpermissive for Jenkins user
+
+abusing sudo previlages or Abuse of Sudo Misconfiguration Leading to Privilege Escalation (NOPASSWD: ALL)
+
+
+Path Disclosure
+
+Jenkins Clickjacking, cors
+
+Php LDAP admin clickjacking, cors
+
+Jenkins concureent login
+
+php ldap admin concurrent login
+
+nessus screenshot

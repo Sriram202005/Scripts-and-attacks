@@ -1,0 +1,7 @@
+AD Quick Commands
+
+crackmapexec smb <ip>
+crackmapexec smb <ip> -u user -p pass
+bloodhound-python
+evil-winrm
+ldapsearch

